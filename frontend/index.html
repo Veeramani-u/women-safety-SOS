@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Women Safety SOS</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #ffe4e6;           /* pink outside the card */
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      max-width: 420px;
+      width: 100%;
+      background: #ffffff;           /* white card */
+      margin: 30px;
+      padding: 0 24px 20px 24px;
+      border-radius: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .header-banner {
+      width: 100%;
+      background: #ffffff;           /* white behind image and title */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 0 20px 0;
+      margin: 0 -24px 10px -24px;    /* banner touches card sides */
+      border-radius: 10px 10px 0 0;
+    }
+
+    .header-banner img {
+      width: 100%;                   /* fill full width of card */
+      height: auto;
+      margin: 0 0 8px 0;
+      display: block;
+    }
+
+    .header-banner h1 {
+      margin: 0;
+      color: #e53935;
+    }
+
+    h2 {
+      margin-top: 18px;
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin: 4px 0;
+      box-sizing: border-box;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    .row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+    }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    button {
+      padding: 8px 14px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      background: #1976d2;
+      color: white;
+      margin-top: 4px;
+    }
+
+    #sosButton {
+      width: 100%;
+      background: #d32f2f;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    p {
+      font-size: 12px;
+      color: #555;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-banner">
+      <!-- logo.jpg must be in the frontend folder -->
+      <img src="logo.jpg" alt="Women Safety">
+      <h1>Women Safety SOS</h1>
+    </div>
+
+    <h2>Create User</h2>
+    <div class="row-3">
+      <input id="userName" placeholder="Name">
+      <input id="userPhone" placeholder="Phone">
+      <input id="userPassword" placeholder="Password" type="password">
+    </div>
+    <button onclick="createUser()">Create User</button>
+    <p id="userResult"></p>
+
+    <h2>Add Emergency Contact</h2>
+    <div class="row-3">
+      <input id="contactUserId" placeholder="User ID (e.g. 1)">
+      <input id="contactName" placeholder="Contact Name">
+      <input id="contactPhone" placeholder="Contact Phone">
+    </div>
+    <input id="contactRelation" placeholder="Relation">
+    <button onclick="addContact()">Add Contact</button>
+    <p id="contactResult"></p>
+
+    <h2>Login (Existing User)</h2>
+    <div class="row-2">
+      <input id="loginPhone" placeholder="Phone">
+      <input id="loginPassword" placeholder="Password" type="password">
+    </div>
+    <button onclick="loginUser()">Login</button>
+    <p id="loginResult"></p>
+
+    <h2>SOS Alert</h2>
+    <div class="row-2">
+      <input id="sosUserId" placeholder="User ID (e.g. 1)">
+      <button id="sosButton" onclick="sendSOS()">SOS</button>
+    </div>
+    <p id="sosResult"></p>
+  </div>
+
+  <script>
+    const API_BASE = "http://127.0.0.1:8000";
+
+    async function createUser() {
+      const body = {
+        name: document.getElementById("userName").value,
+        phone: document.getElementById("userPhone").value,
+        password: document.getElementById("userPassword").value
+      };
+      const res = await fetch(API_BASE + "/users/", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(body)
+      });
+      document.getElementById("userResult").innerText = await res.text();
+    }
+
+    async function addContact() {
+      const userId = document.getElementById("contactUserId").value;
+      const body = {
+        name: document.getElementById("contactName").value,
+        phone: document.getElementById("contactPhone").value,
+        relation: document.getElementById("contactRelation").value
+      };
+      const res = await fetch(API_BASE + `/users/${userId}/contacts/`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(body)
+      });
+      document.getElementById("contactResult").innerText = await res.text();
+    }
+
+    async function sendSOS() {
+      const userId = Number(document.getElementById("sosUserId").value);
+      const body = {
+        user_id: userId,
+        latitude: 12.9716,
+        longitude: 77.5946,
+        message: "SOS from web UI"
+      };
+      const res = await fetch(API_BASE + "/sos/", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(body)
+      });
+      document.getElementById("sosResult").innerText = await res.text();
+    }
+
+    async function loginUser() {
+      const phone = document.getElementById("loginPhone").value;
+      const password = document.getElementById("loginPassword").value;
+
+      document.getElementById("loginResult").innerText =
+        "Login demo: use your registered phone and password. " +
+        "After login, enter your User ID in the SOS section to send alert.";
+    }
+  </script>
+</body>
+</html>
